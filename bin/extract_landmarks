@@ -1,0 +1,94 @@
+#! /usr/bin/env python
+
+import sys
+import rospy
+import roslib
+import array
+
+import cv2
+import dlib
+
+#import messages
+from std_msgs.msg import String
+from sensor_msgs.msg import Image
+from face_features.msg import FaceRaw
+from face_features.msg import FaceNorm8bits
+
+
+from cv_bridge import CvBridge, CvBridgeError
+
+import face_detection_package.face_detection
+
+
+
+nbFrameToSkip = 4
+
+class image_wrapper:
+
+	def __init__(self):
+		self.faceLandmarksNorm8bits = rospy.Publisher("face_landmarks_norm8bits", FaceNorm8bits, queue_size=10)
+		self.faceLandmarksRaw = rospy.Publisher("face_landmarks_raw", FaceRaw, queue_size=10)		
+
+		rospy.init_node('extract_landmarks', anonymous="true", log_level=rospy.WARN)
+
+		self.extractor = face_detection_package.face_detection.landmarks_extractor()
+
+		self.frameCounter = 0
+		self.bridge = CvBridge()
+		self.image_sub = rospy.Subscriber("image_topic",Image, self.callback)
+				
+
+	def callback (self,data):
+		try:
+			cv_image = self.bridge.imgmsg_to_cv2(data, "bgr8")
+		except CvBridgeError as e:
+			print(e)
+
+
+		if self.frameCounter % nbFrameToSkip == 0:
+			self.extractor.prepareImage (cv_image)
+			rospy.logdebug("Computing landmarks")
+			self.extractor.extract()
+			self.frameCounter=0
+
+
+		rospy.logdebug("Frame {0}".format(self.frameCounter))
+		self.frameCounter+=1
+
+		for face in self.extractor.faces:
+			faceNorm8bits = FaceNorm8bits()
+			faceRaw = FaceRaw()
+			
+			bitsStr = ""
+			for landmark in face.scaledLandmarks:
+				#print("{} {}".format(landmark.x, landmark.y))
+				bitsStr += chr(landmark.x)
+				bitsStr += chr(landmark.y)
+
+			
+#			print (bitsStr)
+			
+			faceNorm8bits.id = face.id
+			faceNorm8bits.landmarks = bitsStr
+			#faceRaw.id = face.id
+			#faceRaw.landmarks = face.scaledLandmarks
+				
+#			landMarksImage = self.extractor.getNormalizedLandmarksImageForFace(i)
+	
+			try:
+				self.faceLandmarksNorm8bits.publish(faceNorm8bits)
+			except CvBridgeError as e:
+				rospy.logerror("Can't publish face {0} with error {1}".format(i, error))
+
+
+def main(args):
+	image_wrapper()
+
+	try:
+		rospy.spin()
+	except KeyboardInterrupt:
+		print("Shutting down")
+
+
+if __name__ == '__main__':
+	main(sys.argv)

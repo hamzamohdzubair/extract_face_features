@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(extract_face_feature)
+project(face_features)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -19,6 +19,7 @@ find_package(catkin REQUIRED COMPONENTS
 	cv_bridge
 	image_transport
 	image_geometry
+    message_generation	
 )
 
 ## Uncomment this if the package has a setup.py. This macro ensures
@@ -53,11 +54,11 @@ catkin_python_setup()
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
 ## Generate messages in the 'msg' folder
-# add_message_files(
-#   FILES
-#   Message1.msg
-#   Message2.msg
-# )
+add_message_files(
+  FILES
+  FaceNorm8bits.msg
+  FaceRaw.msg
+)
 
 ## Generate services in the 'srv' folder
 # add_service_files(
@@ -74,10 +75,10 @@ catkin_python_setup()
 # )
 
 ## Generate added messages and services with any dependencies listed here
-# generate_messages(
-#   DEPENDENCIES
-#   std_msgs  # Or other packages containing msgs
-# )
+generate_messages(
+  DEPENDENCIES
+  std_msgs  # Or other packages containing msgs
+)
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -116,6 +117,7 @@ catkin_python_setup()
 #)
 catkin_package(
 	DEPENDS OpenCV
+	CATKIN_DEPENDS message_runtime
 	LIBRARIES 
 )
 
@@ -184,7 +186,7 @@ catkin_package(
 #   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 # )
 
-catkin_install_python(PROGRAMS bin/test DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+catkin_install_python(PROGRAMS bin/extract_landmarks DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
 #############
 ## Testing ##

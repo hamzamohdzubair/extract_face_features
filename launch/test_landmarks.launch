@@ -22,17 +22,32 @@
         
     </node>
 
-  <node pkg="extract_face_feature" type="facial_landmarks" name="landmarks" output="screen">
+  <node pkg="face_features" type="extract_landmarks" name="extract_landmarks" output="screen">
 <!--    <param name="face_model" value="$(find gazr)/share/shape_predictor_68_face_landmarks.dat" /> -->
     <remap from="/image_topic" to="/camera/image_raw"/>
   </node>
 
 
+<!--
 
-  <node name="image_viewer" pkg="image_view" type="image_view" respawn="false" output="screen">
-    <remap from="image" to="/face_landmarks"/>
+  <node name="image_viewer_allface" pkg="image_view" type="image_view" respawn="false" output="screen">
+    <remap from="image" to="/face_image"/>
     <param name="autosize" value="true" />
-<!--    <param name="image_transport" value="theora"/> -->
   </node>
+  
+  <node name="image_viewer_face1" pkg="image_view" type="image_view" respawn="false" output="screen">
+    <remap from="image" to="/face_image_normalized_1"/>
+    <param name="autosize" value="true" />
+  </node>
+  <node name="image_viewer_face2" pkg="image_view" type="image_view" respawn="false" output="screen">
+    <remap from="image" to="/face_image_normalized_2"/>
+    <param name="autosize" value="true" />
+  </node>
+  <node name="image_viewer_face3" pkg="image_view" type="image_view" respawn="false" output="screen">
+    <remap from="image" to="/face_image_normalized_3"/>
+    <param name="autosize" value="true" />
+  </node>
+
+-->
 
 </launch>
